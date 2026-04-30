@@ -10,8 +10,8 @@ app.use(express.json());
 
 // Setup Google Sheet
 const serviceAccountAuth = new JWT({
-  email: creds.client_email,
-  key: creds.private_key,
+  email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
