@@ -5,6 +5,8 @@ self.addEventListener('push', (event) => {
     const options = {
         body: data.body,
         icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827347.png',
+        badge: 'https://cdn-icons-png.flaticon.com/512/1827/1827347.png' // Status bar icon (monochrome)
+};
         image: data.image, // This MUST match the key in your server.js payload
         badge: 'https://cdn-icons-png.flaticon.com/512/1827/1827347.png',
         vibrate: [100, 50, 100],
