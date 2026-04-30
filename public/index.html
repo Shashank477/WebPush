@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Push Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #333; }
+        input, textarea { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { cursor: pointer; border: none; border-radius: 5px; padding: 12px; font-weight: bold; width: 100%; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .reg-btn { background-color: #007bff; color: white; }
+        .admin-panel { border: 2px solid #eaeaea; padding: 20px; margin-top: 30px; border-radius: 10px; background-color: #fcfcfc; }
+        .send-btn { background-color: #28a745; color: white; }
+        label { font-size: 0.9rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>1. User Registration</h2>
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter your name">
+    <button class="reg-btn" onclick="initPush()">Login & Enable Push</button>
+
+    <div class="admin-panel">
+        <h3>2. Send Custom Push (Admin)</h3>
+        
+        <label for="title">Notification Title</label>
+        <input type="text" id="title" placeholder="e.g. Flash Sale! ⚡">
+        
+        <label for="summary">Message Summary</label>
+        <textarea id="summary" placeholder="Enter the main message content..." rows="3"></textarea>
+        
+        <label for="imageUrl">Banner Image URL</label>
+        <input type="text" id="imageUrl" placeholder="https://picsum.photos/600/400">
+        
+        <button class="send-btn" onclick="sendCustomPush()">🚀 Send Broadcast to All</button>
+    </div>
+
+    <script>
+        const publicVapidKey = 'BKhgejwm6SptvYO3dsDTILhz8-ESDrfsOmOeuUFfLLVRdHOajrvx311WHUVgAFAJibC2rJ013b17i6lsujvYdOc';
+
+        // --- PART 1: SUBSCRIBE USER ---
+        async function initPush() {
+            const user = document.getElementById('username').value;
+            if(!user) return alert("Please enter a username first.");
+
+            try {
+                const register = await navigator.serviceWorker.register('/sw.js');
+                const readyRegistration = await navigator.serviceWorker.ready;
+
+                const subscription = await readyRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: publicVapidKey
+                });
+
+                await fetch('/subscribe', {
+                    method: 'POST',
+                    body: JSON.stringify({ user, subscription }),
+                    headers: { 'content-type': 'application/json' }
+                });
+
+                alert("Successfully subscribed! Your data is in the Google Sheet.");
+            } catch (err) {
+                console.error("Subscription failed:", err);
+                alert("Subscription failed. Check console for details.");
+            }
+        }
+
+        // --- PART 2: SEND BROADCAST ---
+        async function sendCustomPush() {
+            const data = {
+                title: document.getElementById('title').value,
+                summary: document.getElementById('summary').value,
+                image: document.getElementById('imageUrl').value
+            };
+
+            if(!data.title || !data.summary) {
+                return alert("Please fill in at least the Title and Summary.");
+            }
+
+            try {
+                const res = await fetch('/send-push', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if(res.ok) {
+                    alert("Push sent successfully!");
+                } else {
+                    alert("Failed to send push.");
+                }
+            } catch (err) {
+                console.error("Error sending push:", err);
+            }
+        }
+    </script>
+    
+</body>
+</html>
