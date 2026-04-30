@@ -2,7 +2,7 @@ const express = require('express');
 const webpush = require('web-push');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
-const creds = require('./creds.json');
+//const creds = require('./creds.json');
 
 const app = express();
 app.use(express.static('public'));
